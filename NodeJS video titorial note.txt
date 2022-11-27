@@ -1,0 +1,384 @@
+https://www.youtube.com/watch?v=TlB_eWDSMt4
+Node a runtime environment for executing javascript code
+Node.js Ideal for Highly scalable, data intensive, and real time apps
+ -> Great for prototyping and agile devt
+ -> Superfast and highly scalable services Companies Paypal, Uber, Netflex, WallMart and so. on (a non blocking or asynchronous property of node)
+ -> Javascript everywhere
+ -> Cleaner and more consistent codebase
+ -> Large ecosystem of open source libs
+
+He took chrome's v8 javascript engine, embeded it inside c++ program and call that program Node.exe
+Node is not a website framework like asp.net ..., but it is a runtime environment for executing javascript code.
+
+Asychronous => a single tread is used to handly multiple request.
+By default node.js app is asynchrous, unlike asp.net (we can also write anysc code but extra work)
+
+request -> database processing data -same tread serve another request-> databasse finished processing and put the msg
+in what we call event queue -> Node is continously monitoring this event in the background.
+
+Note: Node is ideal for I/O intensive tasks.
+Should not be use for CPU intensive apps e.g. video encoding and like image manupulation service
+
+console.log(window) not working. b/s there is no window or doc objects. These are runtime env that we get in browser.
+In node we only have other objects to work with network, os and so on.
+
+Built in modules
+os, fs, events, http
+
+Global
+consol is a global object
+
+setTimeout()
+clearTimeout()
+setInterval()
+clearInterval()
+
+==================================================================================
+Exporting functions and variables
+
+var url = 'http://dom/app';
+function log(message){
+console.log(message);
+}
+
+module.exports.url=url;
+module.exports.log=log;
+
+----------------------------------------------------
+importing the module
+require(path)
+e.g.
+require('./logger.js');
+or simply require('./logger');
+
+var logger=require('./logger');
+console.log(logger);
+
+correction use const instead of var to protect accidentally changing values
+
+use jshint to get more meaningful error message
+how to install it?
+ npm install jshint -g
+
+then run jshint app.js
+
+ jshint is also usefull to scan our error at compile time not only at runtime
+
+Module wrapper functioin
+(function (exports, require, module, __filename, __dirname){
+	...your module cde
+})
+
+this is called immediately invoked function expression or iife
+
+An IIFE (Immediately Invoked Function Expression) is a JavaScript function that runs as soon as it is defined. 
+The name IIFE is promoted by Ben Alman in his blog.
+
+(function () {
+  // …
+})();
+
+(() => {
+  // …
+})();
+
+(async () => {
+  // …
+})();
+==================================================================
+
+The arguements are local to each module (exports, require, ....)
+
+so inside this function, instead of module.exports.log=log you can
+simply use exports.log=log (Note that you can't say exports=log b/s exports is a refrerence)
+
+
+(function (exports, require, module, __filename, __dirname) {
+  console.log("hello world");
+})();
+
+Template string => ES6 OR Called ES2015 => OR => ECMA SCRIPT 6
+
+=================
+e.g. using the fs Module
+var fs = require("fs");
+var files = fs.readdirSync("./");
+console.log("fs sync", files);
+fs.readdir("./", function (err, result) {
+  if (err) console.log("fs", err);
+  else console.log("fs", result);
+});
+
+============
+//get the event emitter Class (not object)
+var EventEmitter = require("events");
+var emitter = new EventEmitter();
+//register the event with its call back fn
+emitter.on("MyFirstEvent", function (args) {
+  console.log("First event", args);
+});
+
+//somewhere emit the event
+emitter.emit("MyFirstEvent", [1, 2, 3, 4]);
+
+The order is important, if u register after emit, nothing wd happen
+
+EventEmitter class
+we can build a class inherited from EventEmitter use the class in logging msg
+
+var EventEmitter = require("events");
+//in the logger.js
+class Logger extends EventEmitter {
+  log(message) {
+    this.on("MyFirstEvent", function (args) {
+      console.log("First event", args);
+    });
+    console.log(message);
+    //somewhere emit the event
+  }
+}
+module.exports = Logger;
+
+//then in app.js
+var Logger = require("./logger");
+var logger = new Logger();
+logger.emit("MyFirstEvent", [1, 2, 3, 4]);
+
+logger.log("message");
+===========================================================
+Http Server
+http module has CreateServer method that returns a server that is actually like an EventEmitter
+
+var http = require("http");
+var server = http.createServer();
+server.on("connection", (socket) => {
+  console.log("New connection...");
+});
+server.listen(3000);
+console.log("listening..");
+
+=================================================================
+if you go to the browser http://localhost:3000 and 
+load page then return back to the terminal you ll see this. 
+New connection is added as you reload the page.
+listening..
+New connection...
+New connection...
+New connection...
+
+==================================================================
+In real world application w r not respond to connection event/socket object,
+this is very low level. But we listen the request and err objects.
+
+var http = require("http");
+var server = http.createServer((req, res) => {
+  if (req.url === "/") res.write("hello world");
+  res.end();
+});
+
+=======================================================
+var http = require("http");
+var server = http.createServer((req, res) => {
+  console.log(req.url);
+  if (req.url === "/") {
+    res.write("hello world");
+  }
+  if (req.url === "/api/courses") {
+    res.write(JSON.stringify([1, 2, 3, 4]));
+  }
+  res.end();
+});
+
+=======================================================
+RESTFul API Standards
+GET /api/customers
+GET /api/customers/1
+PUT /api/customers/1
+DELETE /api/customers/1
+POST /api/customers
+
+======================================================
+
+
+
+Using Express as web server
+
+create a folder express-demo
+npm init -yes
+npm i express
+
+
+Hi Rediet, 
+Performance review
+Since I was taking tasks from EPP project before and during the evaluation period (parallel to ATS under Esayas),
+With your permission I would prefer Meba(PO) and Meskerem(PM) to do my evaluation. I have already spoken Meba. 
+
+
+
+
+
+
+Building with express server
+const express = require("express");
+
+const app = express();
+app.get("/", (req, res) => {
+  res.write("Hello Express World");
+  res.end();
+});
+app.listen(3000, () => console.log("listening on port 3000"));
+-------------------------------------------------------------------------
+using send
+
+const app = express();
+app.get("/", (req, res) => {
+  res.send([1, 2, 3, 4]);
+});
+-------------------------------------------------------------------------
+
+Until now whenever we modify the code we need to restart the server to see changes in the output on the browser.
+To avoid this let's install nodemonitor 
+npm i -g nodemon
+-------------------------------------------------------------------------
+
+IMPROVING THE HARDCODE ASIGNING PORT
+we can't rely for the port 3000 will be available in production hosting environment. It has to be set in the environmnet var
+outside the application.
+
+const port = process.env.PORT || 3000;
+app.listen(3000, () => console.log(`listening on port ${port}`));
+
+to change the port run on terminal the followign
+creating the port environment
+export PORT=5000
+
+------------------------------------------------------------------------------
+const app = express();
+//get all courses
+app.get("/api/courses", (req, res) => {
+  res.send([1, 2, 3, 4, 5]);
+});
+//with id
+
+app.get("/api/courses/:id", (req, res) => {
+  res.send(req.params.id);
+});
+//multiple parameter
+app.get("/api/courses/:name/:id", (req, res) => {
+  res.send(`Course name ${req.params.name} and Course Id: ${req.params.id}`);
+});
+
+---------------------------
+accessing all request params as object
+app.get("/api/courses/:name/:id", (req, res) => {
+  res.send(req.params);
+});
+
+http://localhost:5000/api/courses/English/2 => {"name":"English","id":"2"}
+---------------------------------------------------------------------------------------------
+route parameters vs query string parameters
+
+route parameters are essential or required values while query string parameters are optional data 
+to give more information about the query
+
+/api/courses/4/2/?sortBy='name' ==> 4 and 2 are route parameters and sortBy is query string parameters.
+
+----------------------------------------------------------------------------
+accessing string request query
+app.get("/api/courses/:id", (req, res) => {
+  res.send(req.query);
+});
+
+
+http://localhost:5000/api/courses/2/?name=English ---->
+{"name":"English"}
+
+
+
+====================================
+PROPERLY RESPONDING TO REQUEST
+
+//with id
+app.get("/api/courses/:id", (req, res) => {
+  const course = courses.find((r) => r.id === parseInt(req.params.id));
+  if (!course) res.status(404).send("Course with specified id was not found");
+  res.send(course);
+});
+----------------------------------------------------------------------------------------------
+POSTING
+
+inorder to req.body.name to work,  you have to include the following code snippet
+app.use(express.json());
+
+app.post("/api/courses", (req, res) => {
+ const newCourse = {id: courses.length +1, name: req.body.name };
+ courses.push(newCourse);
+ res.send(newCourse); //It is convetion when we add a new item we have to send the new 
+                      //course to the client with new id added b/s chanses are the client need to know the new id
+});
+
+----------------------------------------------------------------------------------------------
+VALIDATION
+  if (!req.body.name || req.body.name.length < 3) {
+    // 400 bad request
+    res.status(400).send("Name is required and should be min 3 character");
+    return;
+  }
+
+---------------------------------------------------------------------------------------------
+INPUT VALIDATION USING joi
+//install joi
+npm i joi
+
+on the top declare Joi class
+const Joi = require("joi");
+
+//use it in post method
+app.post("/api/courses", (req, res) => {
+  const schema = Joi.object({
+    name: Joi.string().min(3).required(),
+  });
+  const result = schema.validate(req.body);
+  if (result.error) {
+    // 400 bad request
+    res.status(400).send(result.error.details[0].message); //joi will return appropriate message
+    return;
+}
+------------------------------------------------------------------------------------------------
+PUT METHOD
+
+app.put("/api/courses/:id", (req, res) => {
+  const course = courses.find((r) => r.id === parseInt(req.params.id));
+  if (!course) {
+    res.status(404).send("The course with requested id is not found");
+    return;
+  }
+  const schema = Joi.object({
+    name: Joi.string().min(3).required(),
+  });
+  const result = schema.validate(req.body);
+  if (result.error) {
+    res.status(400).send(result.error.details[0].message);
+    return;
+  }
+
+  course.name = req.body.name;
+  res.send(course);
+});
+--------------------------------------------------------------------------------------------------
+
+Refactor course validation for reuse
+function validateCourse(course) {
+  const schema = Joi.object({
+    name: Joi.string().min(3).required(),
+  });
+  return schema.validate(req.body);
+}
+
+const {error}= validateCourse(req.body);
+  if (error) {
+    res.status(400).send(error.details[0].message);
+    return;
+  }	
+              
+
